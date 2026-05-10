@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>we11tex — Shift Profit</title>
+  <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="nav-inner">
+      <a href="#calculator" class="logo">we11tex</a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#calculator" class="nav-link">Calculator</a>
+        <a href="#about" class="nav-link">About</a>
+        <a href="#support" class="nav-link">Support</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main">
+    <div id="calculator" class="hero anchor">
+      <p class="hero-eyebrow">Drivers · IRS 2024 · Live gas</p>
+      <h1 class="hero-title">Shift profit calculator</h1>
+      <p class="hero-sub">Gross pay minus IRS standard mileage and fuel. Estimates for planning only.</p>
+    </div>
+
+    <section class="card" aria-labelledby="calc-heading">
+      <h2 id="calc-heading" class="sr-only">Calculator inputs</h2>
+      <div class="field-group">
+        <div id="stateCombobox" class="combobox">
+          <label class="label" for="stateInput">State</label>
+          <input
+            id="stateInput"
+            class="input"
+            type="text"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            placeholder="Search state…"
+            aria-autocomplete="list"
+            aria-expanded="false"
+            aria-controls="statePanel"
+            role="combobox"
+          />
+          <div id="statePanel" class="combobox-panel" data-open="false" role="listbox" aria-label="States">
+            <div id="stateList"></div>
+          </div>
+        </div>
+        <div>
+          <label class="label" for="gross">Gross pay ($)</label>
+          <input id="gross" class="input" type="text" inputmode="decimal" placeholder="0.00" />
+        </div>
+        <div>
+          <label class="label" for="miles">Total miles driven</label>
+          <input id="miles" class="input" type="text" inputmode="decimal" placeholder="0" />
+        </div>
+        <div>
+          <label class="label" for="mpg">Car MPG</label>
+          <input id="mpg" class="input" type="text" inputmode="decimal" placeholder="25" />
+        </div>
+      </div>
+    </section>
+
+    <section class="card card--tight" aria-labelledby="results-heading">
+      <h2 id="results-heading" class="section-title">Results</h2>
+      <div class="results-grid">
+        <div class="stat">
+          <p class="stat-label">IRS standard (2024)</p>
+          <p id="outIrs" class="stat-value">$0.00</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Gas cost</p>
+          <p id="outGas" class="stat-value stat-value--gas">$0.00</p>
+        </div>
+      </div>
+      <div class="net-wrap">
+        <p class="net-label">Net profit</p>
+        <p id="outNet" class="net-value">$0.00</p>
+      </div>
+      <p class="disclaimer">Estimates only. Gas and tax figures are illustrative 2024-style averages by state—not personal tax advice. Consult a tax professional.</p>
+    </section>
+
+    <section id="about" class="card anchor" aria-labelledby="about-heading">
+      <h2 id="about-heading" class="about-title">Infrastructure for the gig economy</h2>
+      <p class="about-text">
+        we11tex is built by people who care about data, clarity, and dignity at work. We treat driver earnings as operational reality—not a spreadsheet puzzle. Our tools translate messy shifts into numbers you can trust when you plan your week, your car, and your life on the road.
+      </p>
+      <p class="about-text" style="margin-top: 1rem">
+        Born from late-night routes and too many receipts, this is precision software for the workforce that keeps cities moving—designed by geeks who respect the craft of driving.
+      </p>
+      <div class="privacy-badge">
+        <p>No data tracking. Total privacy.</p>
+      </div>
+    </section>
+
+    <section id="support" class="card card--tight anchor" aria-labelledby="support-heading">
+      <h2 id="support-heading" class="support-title">Fuel the product</h2>
+      <p class="support-text">If this calculator saves you time or money, you can support ongoing development with crypto.</p>
+      <button type="button" class="btn btn-primary" data-copy-usdt>Copy USDT (TRC20)</button>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-row">
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+      <div class="footer-crypto">
+        <span class="footer-crypto-label">USDT TRC20</span>
+        <div class="footer-crypto-row">
+          <code id="footerUsdtAddress"></code>
+          <button type="button" class="btn btn-ghost" data-copy-usdt>Copy</button>
+        </div>
+      </div>
+    </div>
+    <p class="footer-copy">© we11tex</p>
+  </footer>
+
+  <div id="cookieBanner" class="cookie-banner" data-hidden="false" role="dialog" aria-label="Cookie notice">
+    <div class="cookie-inner">
+      <p class="cookie-text">We use cookies to ensure you get the best experience on our website.</p>
+      <button type="button" id="cookieAccept" class="btn btn-primary">Accept</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
