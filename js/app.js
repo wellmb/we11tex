@@ -54,6 +54,19 @@ const US_STATES = [
 const IRS_STANDARD_MILEAGE_2024 = 0.67;
 const USDT_TRC20 = 'ТВОЙ_АДРЕС_КОШЕЛЬКА';
 const COOKIE_KEY = 'we11tex_cookie_consent';
+const TELEGRAM_USERNAME = 'we11tex';
+
+function roundGasUsd(n) {
+  return Math.round(n * 100) / 100;
+}
+
+function suggestedGasPrice(state, fuelType) {
+  if (!state) return 0;
+  const regular = state.gasPrice;
+  if (fuelType === 'premium') return roundGasUsd(regular + 0.62);
+  if (fuelType === 'diesel') return roundGasUsd(regular + 0.54);
+  return roundGasUsd(regular);
+}
 
 (function () {
   const el = (id) => document.getElementById(id);
@@ -111,8 +124,7 @@ const COOKIE_KEY = 'we11tex_cookie_consent';
       left.textContent = st.name;
       const meta = document.createElement('span');
       meta.className = 'combobox-meta';
-      meta.textContent =
-        '$' + st.gasPrice.toFixed(2) + ' · ~' + st.incomeTaxPct + '%';
+      meta.textContent = '$' + st.gasPrice.toFixed(2) + ' reg · ~' + st.incomeTaxPct + '%';
       btn.appendChild(left);
       btn.appendChild(meta);
       btn.addEventListener('mousedown', (e) => e.preventDefault());
@@ -120,6 +132,7 @@ const COOKIE_KEY = 'we11tex_cookie_consent';
         selected = st;
         el('stateInput').value = st.name;
         setListOpen(false);
+        applySuggestedGasPrice();
         calc();
       });
       list.appendChild(btn);
@@ -131,11 +144,19 @@ const COOKIE_KEY = 'we11tex_cookie_consent';
     if (input && selected) input.value = selected.name;
   }
 
+  function applySuggestedGasPrice() {
+    const fuelEl = el('fuelType');
+    const gasEl = el('gasPrice');
+    if (!fuelEl || !gasEl || !selected) return;
+    const p = suggestedGasPrice(selected, fuelEl.value);
+    gasEl.value = p.toFixed(2);
+  }
+
   function calc() {
     const gross = parseNum(el('gross').value);
     const miles = parseNum(el('miles').value);
     const mpg = parseNum(el('mpg').value);
-    const gasPrice = selected ? selected.gasPrice : 0;
+    const gasPrice = parseNum(el('gasPrice').value);
 
     const irsDeduction = miles * IRS_STANDARD_MILEAGE_2024;
     let gasCost = 0;
@@ -197,12 +218,70 @@ const COOKIE_KEY = 'we11tex_cookie_consent';
     }
   }
 
+  function initSpaNav() {
+    const panels = {
+      calculator: el('view-calculator'),
+      about: el('view-about'),
+      support: el('view-support'),
+    };
+    let currentView = '';
+    function showView(name, opts) {
+      const o = opts || {};
+      const key = panels[name] ? name : 'calculator';
+      Object.entries(panels).forEach(([k, node]) => {
+        if (!node) return;
+        const on = k === key;
+        node.classList.toggle('hidden', !on);
+        node.setAttribute('aria-hidden', on ? 'false' : 'true');
+      });
+      document.querySelectorAll('.nav-link[data-view], .logo[data-view]').forEach((n) => {
+        const v = n.getAttribute('data-view');
+        n.classList.toggle('is-active', v === key);
+      });
+      if (!o.skipHistory && history.pushState && key !== currentView) {
+        history.pushState({ view: key }, '', '#' + key);
+      }
+      currentView = key;
+    }
+    document.querySelectorAll('[data-view]').forEach((node) => {
+      node.addEventListener('click', (e) => {
+        e.preventDefault();
+        showView(node.getAttribute('data-view'), {});
+      });
+    });
+    window.addEventListener('popstate', () => {
+      const h = (location.hash || '').replace(/^#/, '');
+      showView(h === 'about' || h === 'support' || h === 'calculator' ? h : 'calculator', { skipHistory: true });
+    });
+    const fromHash = (location.hash || '').replace(/^#/, '');
+    showView(fromHash === 'about' || fromHash === 'support' || fromHash === 'calculator' ? fromHash : 'calculator', {
+      skipHistory: true,
+    });
+  }
+
   function init() {
     const foot = el('footerUsdtAddress');
     if (foot) foot.textContent = USDT_TRC20;
 
+    const tgLink = el('telegramLink');
+    const tgUser = el('telegramUser');
+    if (tgLink) tgLink.href = 'https://t.me/' + TELEGRAM_USERNAME;
+    if (tgUser) tgUser.textContent = '@' + TELEGRAM_USERNAME;
+
+    initSpaNav();
+
     syncInputFromSelection();
     renderStateList('');
+
+    const fuelType = el('fuelType');
+    if (fuelType) {
+      fuelType.addEventListener('change', () => {
+        applySuggestedGasPrice();
+        calc();
+      });
+    }
+
+    applySuggestedGasPrice();
 
     const stateInput = el('stateInput');
     const statePanel = el('statePanel');
@@ -238,12 +317,15 @@ const COOKIE_KEY = 'we11tex_cookie_consent';
     document.addEventListener('mousedown', onDocPointerDown);
     document.addEventListener('touchstart', onDocPointerDown, { passive: true });
 
-    ['gross', 'miles', 'mpg'].forEach((id) => {
+    ['gross', 'miles', 'mpg', 'gasPrice'].forEach((id) => {
       const node = el(id);
       if (!node) return;
       node.addEventListener('input', calc);
       node.addEventListener('change', calc);
     });
+
+    const calcBtn = el('calcBtn');
+    if (calcBtn) calcBtn.addEventListener('click', calc);
 
     $$('[data-copy-usdt]').forEach((btn) => {
       btn.addEventListener('click', async () => {

@@ -5,101 +5,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>we11tex — Shift Profit</title>
   <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
   <header class="site-header">
     <div class="nav-inner">
-      <a href="#calculator" class="logo">we11tex</a>
+      <a href="#" class="logo" data-view="calculator">we11tex</a>
       <nav class="nav" aria-label="Primary">
-        <a href="#calculator" class="nav-link">Calculator</a>
-        <a href="#about" class="nav-link">About</a>
-        <a href="#support" class="nav-link">Support</a>
+        <a href="#" class="nav-link is-active" data-view="calculator">Calculator</a>
+        <a href="#" class="nav-link" data-view="about">About</a>
+        <a href="#" class="nav-link" data-view="support">Support</a>
       </nav>
     </div>
   </header>
 
   <main class="main">
-    <div id="calculator" class="hero anchor">
-      <p class="hero-eyebrow">Drivers · IRS 2024 · Live gas</p>
-      <h1 class="hero-title">Shift profit calculator</h1>
-      <p class="hero-sub">Gross pay minus IRS standard mileage and fuel. Estimates for planning only.</p>
-    </div>
+    <div class="main-inner">
+      <div id="view-calculator" class="view" data-panel="calculator" aria-hidden="false">
+        <div class="main-grid">
+          <div class="main-col main-col--left">
+            <div class="hero">
+              <p class="hero-eyebrow">Drivers · IRS 2024 · Live gas</p>
+              <h1 class="hero-title">Shift profit calculator</h1>
+              <p class="hero-sub">Gross pay minus IRS standard mileage and fuel. Estimates for planning only.</p>
+            </div>
 
-    <section class="card" aria-labelledby="calc-heading">
-      <h2 id="calc-heading" class="sr-only">Calculator inputs</h2>
-      <div class="field-group">
-        <div id="stateCombobox" class="combobox">
-          <label class="label" for="stateInput">State</label>
-          <input
-            id="stateInput"
-            class="input"
-            type="text"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            placeholder="Search state…"
-            aria-autocomplete="list"
-            aria-expanded="false"
-            aria-controls="statePanel"
-            role="combobox"
-          />
-          <div id="statePanel" class="combobox-panel" data-open="false" role="listbox" aria-label="States">
-            <div id="stateList"></div>
+            <section class="card" aria-labelledby="calc-heading">
+              <h2 id="calc-heading" class="sr-only">Calculator inputs</h2>
+              <div class="field-group">
+                <div id="stateCombobox" class="combobox">
+                  <label class="label" for="stateInput">State</label>
+                  <input
+                    id="stateInput"
+                    class="input"
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    spellcheck="false"
+                    placeholder="Search state…"
+                    aria-autocomplete="list"
+                    aria-expanded="false"
+                    aria-controls="statePanel"
+                    role="combobox"
+                  />
+                  <div id="statePanel" class="combobox-panel" data-open="false" role="listbox" aria-label="States">
+                    <div id="stateList"></div>
+                  </div>
+                </div>
+                <div>
+                  <label class="label" for="fuelType">Fuel type</label>
+                  <div class="select-shell">
+                    <select id="fuelType" class="select select--custom" aria-describedby="fuelHint">
+                      <option value="regular">Regular</option>
+                      <option value="premium">Premium</option>
+                      <option value="diesel">Diesel</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label class="label" for="gasPrice">Gas price ($/gal)</label>
+                  <input id="gasPrice" class="input" type="text" inputmode="decimal" placeholder="0.00" autocomplete="off" />
+                  <p id="fuelHint" class="field-hint">Filled from your state and fuel type. Change it if you paid a different price at the pump.</p>
+                </div>
+                <div>
+                  <label class="label" for="gross">Gross pay ($)</label>
+                  <input id="gross" class="input" type="text" inputmode="decimal" placeholder="0.00" />
+                </div>
+                <div>
+                  <label class="label" for="miles">Total miles driven</label>
+                  <input id="miles" class="input" type="text" inputmode="decimal" placeholder="0" />
+                </div>
+                <div>
+                  <label class="label" for="mpg">Car MPG</label>
+                  <input id="mpg" class="input" type="text" inputmode="decimal" placeholder="25" />
+                </div>
+                <button type="button" class="btn btn-primary" id="calcBtn">Calculate</button>
+              </div>
+            </section>
+          </div>
+
+          <div class="main-col main-col--right">
+            <section class="card card--tight" aria-labelledby="results-heading">
+              <h2 id="results-heading" class="section-title">Results</h2>
+              <div class="results-grid">
+                <div class="stat">
+                  <p class="stat-label">IRS standard (2024)</p>
+                  <p id="outIrs" class="stat-value">$0.00</p>
+                </div>
+                <div class="stat">
+                  <p class="stat-label">Gas cost</p>
+                  <p id="outGas" class="stat-value stat-value--gas">$0.00</p>
+                </div>
+              </div>
+              <div class="net-wrap">
+                <p class="net-label">Net profit</p>
+                <p id="outNet" class="net-value">$0.00</p>
+              </div>
+              <p class="disclaimer">Estimates only. Gas and tax figures are illustrative 2024-style averages by state—not personal tax advice. Consult a tax professional.</p>
+            </section>
           </div>
         </div>
-        <div>
-          <label class="label" for="gross">Gross pay ($)</label>
-          <input id="gross" class="input" type="text" inputmode="decimal" placeholder="0.00" />
-        </div>
-        <div>
-          <label class="label" for="miles">Total miles driven</label>
-          <input id="miles" class="input" type="text" inputmode="decimal" placeholder="0" />
-        </div>
-        <div>
-          <label class="label" for="mpg">Car MPG</label>
-          <input id="mpg" class="input" type="text" inputmode="decimal" placeholder="25" />
-        </div>
       </div>
-    </section>
 
-    <section class="card card--tight" aria-labelledby="results-heading">
-      <h2 id="results-heading" class="section-title">Results</h2>
-      <div class="results-grid">
-        <div class="stat">
-          <p class="stat-label">IRS standard (2024)</p>
-          <p id="outIrs" class="stat-value">$0.00</p>
-        </div>
-        <div class="stat">
-          <p class="stat-label">Gas cost</p>
-          <p id="outGas" class="stat-value stat-value--gas">$0.00</p>
-        </div>
+      <div id="view-about" class="view hidden" data-panel="about" aria-hidden="true">
+        <section class="card" aria-labelledby="about-heading">
+          <h2 id="about-heading" class="about-title">The People's Calculator</h2>
+          <p class="about-text">
+            Tired of apps cluttered with ads and hidden subscriptions, I decided to build we11tex. My goal is to keep this tool free, ad-free, and folk—built for drivers, not for dashboards. We rely on the honesty and support of the driving community. If it helps you earn more, feel free to fuel the code.
+          </p>
+          <div class="story-block">
+            <h3 class="story-block__title">Why now</h3>
+            <p class="story-block__text">
+              Platforms change fees and policies faster than most people can update a spreadsheet. I shipped we11tex in that gap: one straight screen with real inputs, no account wall, so you can sanity-check a shift before tax season—or before taking one more fare. If the numbers save you time, that is the whole point.
+            </p>
+          </div>
+          <div class="privacy-badge">
+            <p>No data tracking. Total privacy.</p>
+          </div>
+        </section>
       </div>
-      <div class="net-wrap">
-        <p class="net-label">Net profit</p>
-        <p id="outNet" class="net-value">$0.00</p>
-      </div>
-      <p class="disclaimer">Estimates only. Gas and tax figures are illustrative 2024-style averages by state—not personal tax advice. Consult a tax professional.</p>
-    </section>
 
-    <section id="about" class="card anchor" aria-labelledby="about-heading">
-      <h2 id="about-heading" class="about-title">Infrastructure for the gig economy</h2>
-      <p class="about-text">
-        we11tex is built by people who care about data, clarity, and dignity at work. We treat driver earnings as operational reality—not a spreadsheet puzzle. Our tools translate messy shifts into numbers you can trust when you plan your week, your car, and your life on the road.
-      </p>
-      <p class="about-text" style="margin-top: 1rem">
-        Born from late-night routes and too many receipts, this is precision software for the workforce that keeps cities moving—designed by geeks who respect the craft of driving.
-      </p>
-      <div class="privacy-badge">
-        <p>No data tracking. Total privacy.</p>
-      </div>
-    </section>
+      <div id="view-support" class="view hidden" data-panel="support" aria-hidden="true">
+        <section class="card card--tight" aria-labelledby="support-heading">
+          <h2 id="support-heading" class="support-title">Direct Support</h2>
+          <p class="support-text">
+            I built this project solo to help drivers get real numbers. If you found a bug or have a suggestion, hit me up. I'm usually around unless I'm coding the next update.
+          </p>
+          <a
+            id="telegramLink"
+            class="btn-telegram"
+            href="https://t.me/we11tex"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg class="btn-telegram__icon" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M21.945 3.02c.17.13.27.34.24.55l-2.5 17.5a.75.75 0 01-1.18.5l-4.63-3.38-2.22 2.14a.75.75 0 01-1.26-.55v-3.08l7.9-7.26-9.8 6.05-3.76 1.16c-.22.07-.46 0-.62-.17a.75.75 0 01-.22-.63l1.42-12.5a.75.75 0 011.02-.65l18.5 7c.2.08.35.24.42.45z"
+              />
+            </svg>
+            <span class="btn-telegram__label">Message me on Telegram</span>
+            <span id="telegramUser" class="btn-telegram__user">@we11tex</span>
+          </a>
 
-    <section id="support" class="card card--tight anchor" aria-labelledby="support-heading">
-      <h2 id="support-heading" class="support-title">Fuel the product</h2>
-      <p class="support-text">If this calculator saves you time or money, you can support ongoing development with crypto.</p>
-      <button type="button" class="btn btn-primary" data-copy-usdt>Copy USDT (TRC20)</button>
-    </section>
+          <div class="support-divider" role="presentation"></div>
+
+          <h3 class="support-subtitle">Fuel the code</h3>
+          <p class="support-text support-text--tight">USDT (TRC20). Copy the address if you want to chip in for hosting and updates.</p>
+          <button type="button" class="btn btn-primary" data-copy-usdt>Copy USDT (TRC20)</button>
+        </section>
+      </div>
+    </div>
   </main>
 
   <footer class="site-footer">
