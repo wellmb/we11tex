@@ -14,6 +14,9 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <div id="bg-canvas-wrap" aria-hidden="true">
+    <canvas id="bg-canvas"></canvas>
+  </div>
   <header class="site-header">
     <div class="nav-inner">
       <a href="#" class="logo" data-view="calculator">we11tex</a>
@@ -31,9 +34,9 @@
         <div class="main-grid">
           <div class="main-col main-col--left">
             <div class="hero">
-              <p class="hero-eyebrow">Drivers · IRS 2024 · Live gas</p>
+              <p class="hero-eyebrow">Drivers · IRS 2026 forecast · Live gas</p>
               <h1 class="hero-title">Shift profit calculator</h1>
-              <p class="hero-sub">Gross pay minus IRS standard mileage and fuel. Estimates for planning only.</p>
+              <p class="hero-sub">Gross pay minus IRS standard mileage (forecast), fuel, and optional shift costs. Estimates for planning only.</p>
             </div>
 
             <section class="card" aria-labelledby="calc-heading">
@@ -85,9 +88,27 @@
                   <label class="label" for="mpg">Car MPG</label>
                   <input id="mpg" class="input" type="text" inputmode="decimal" placeholder="25" />
                 </div>
+                <div class="checkbox-field">
+                  <input type="checkbox" id="detailExpenses" class="checkbox-input" />
+                  <label for="detailExpenses" class="checkbox-label">Detailed expenses</label>
+                </div>
+                <div id="detailExpensesFields" class="detail-expenses hidden">
+                  <div>
+                    <label class="label" for="insurancePerShift">Insurance / fees per shift ($)</label>
+                    <input id="insurancePerShift" class="input" type="text" inputmode="decimal" placeholder="0" />
+                  </div>
+                  <div>
+                    <label class="label" for="carWash">Daily car wash ($)</label>
+                    <input id="carWash" class="input" type="text" inputmode="decimal" placeholder="0" />
+                  </div>
+                </div>
                 <button type="button" class="btn btn-primary" id="calcBtn">Calculate</button>
               </div>
             </section>
+            <div class="quick-presets" aria-label="Quick mileage presets">
+              <button type="button" class="btn btn-preset" id="presetCity">City Shift</button>
+              <button type="button" class="btn btn-preset" id="presetHighway">Highway</button>
+            </div>
           </div>
 
           <div class="main-col main-col--right">
@@ -95,7 +116,7 @@
               <h2 id="results-heading" class="section-title">Results</h2>
               <div class="results-grid">
                 <div class="stat">
-                  <p class="stat-label">IRS standard (2024)</p>
+                  <p class="stat-label">IRS mileage (2026 forecast)</p>
                   <p id="outIrs" class="stat-value">$0.00</p>
                 </div>
                 <div class="stat">
@@ -107,7 +128,9 @@
                 <p class="net-label">Net profit</p>
                 <p id="outNet" class="net-value">$0.00</p>
               </div>
-              <p class="disclaimer">Estimates only. Gas and tax figures are illustrative 2024-style averages by state—not personal tax advice. Consult a tax professional.</p>
+              <p class="disclaimer">
+                Estimates only. IRS standard mileage uses a <strong>forecast rate of $0.72/mi for 2026</strong> (not final IRS guidance). State gas prices are illustrative averages—not personal tax advice. Consult a tax professional.
+              </p>
             </section>
           </div>
         </div>
@@ -190,6 +213,8 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.min.js"></script>
+  <script src="js/background.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

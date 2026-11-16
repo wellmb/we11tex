@@ -51,7 +51,7 @@ const US_STATES = [
   { code: 'WY', name: 'Wyoming', gasPrice: 3.25, incomeTaxPct: 0 },
 ];
 
-const IRS_STANDARD_MILEAGE_2024 = 0.67;
+const IRS_STANDARD_MILEAGE_2026_FORECAST = 0.72;
 const USDT_TRC20 = 'ТВОЙ_АДРЕС_КОШЕЛЬКА';
 const COOKIE_KEY = 'we11tex_cookie_consent';
 const TELEGRAM_USERNAME = 'we11tex';
@@ -87,6 +87,8 @@ function suggestedGasPrice(state, fuelType) {
 
   let selected = US_STATES.find((s) => s.code === 'CA') || US_STATES[0];
   let listOpen = false;
+  let netAnimId = null;
+  let netAnimCancel = null;
 
   function setListOpen(open) {
     listOpen = open;
@@ -152,21 +154,93 @@ function suggestedGasPrice(state, fuelType) {
     gasEl.value = p.toFixed(2);
   }
 
-  function calc() {
+  function computeTotals() {
     const gross = parseNum(el('gross').value);
     const miles = parseNum(el('miles').value);
     const mpg = parseNum(el('mpg').value);
     const gasPrice = parseNum(el('gasPrice').value);
 
-    const irsDeduction = miles * IRS_STANDARD_MILEAGE_2024;
+    const irsDeduction = miles * IRS_STANDARD_MILEAGE_2026_FORECAST;
     let gasCost = 0;
     if (mpg > 0) gasCost = (miles / mpg) * gasPrice;
 
-    const netProfit = gross - irsDeduction - gasCost;
+    let extra = 0;
+    if (el('detailExpenses') && el('detailExpenses').checked) {
+      extra = parseNum(el('insurancePerShift').value) + parseNum(el('carWash').value);
+    }
 
+    const netProfit = gross - irsDeduction - gasCost - extra;
+    return { gross, miles, mpg, gasPrice, irsDeduction, gasCost, extra, netProfit };
+  }
+
+  function setNetStyle(net) {
+    const out = el('outNet');
+    if (!out) return;
+    out.classList.toggle('net-value--negative', net < 0);
+  }
+
+  function displayNetValue(value) {
+    const out = el('outNet');
+    if (!out) return;
+    out.textContent = fmt(value);
+    setNetStyle(value);
+  }
+
+  function cancelNetAnim() {
+    if (typeof netAnimCancel === 'function') {
+      netAnimCancel();
+      netAnimCancel = null;
+    }
+    if (netAnimId !== null) {
+      cancelAnimationFrame(netAnimId);
+      netAnimId = null;
+    }
+  }
+
+  function animateNetTo(target, ms) {
+    cancelNetAnim();
+    const out = el('outNet');
+    if (!out) return;
+    let cancelled = false;
+    netAnimCancel = () => {
+      cancelled = true;
+    };
+    const start = performance.now();
+    const from = 0;
+    const dur = ms || 650;
+    out.textContent = fmt(0);
+    out.classList.toggle('net-value--negative', target < 0);
+
+    function tick(now) {
+      if (cancelled) return;
+      const t = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const v = from + (target - from) * eased;
+      out.textContent = fmt(v);
+      out.classList.toggle('net-value--negative', v < 0);
+      if (t < 1) {
+        netAnimId = requestAnimationFrame(tick);
+      } else {
+        out.textContent = fmt(target);
+        setNetStyle(target);
+        netAnimId = null;
+        netAnimCancel = null;
+      }
+    }
+    netAnimId = requestAnimationFrame(tick);
+  }
+
+  function calc() {
+    cancelNetAnim();
+    const { irsDeduction, gasCost, netProfit } = computeTotals();
     el('outIrs').textContent = fmt(irsDeduction);
     el('outGas').textContent = fmt(gasCost);
-    el('outNet').textContent = fmt(netProfit);
+    displayNetValue(netProfit);
+  }
+
+  function onCalculateClick() {
+    const { netProfit } = computeTotals();
+    animateNetTo(netProfit, 700);
   }
 
   let toastTimer;
@@ -215,6 +289,57 @@ function suggestedGasPrice(state, fuelType) {
     if (!root.contains(e.target)) {
       setListOpen(false);
       syncInputFromSelection();
+    }
+  }
+
+  function initSelectAllOnFocus() {
+    const ids = ['gross', 'miles', 'mpg', 'gasPrice', 'insurancePerShift', 'carWash'];
+    ids.forEach((id) => {
+      const node = el(id);
+      if (!node) return;
+      node.addEventListener('focus', function () {
+        const self = this;
+        requestAnimationFrame(() => {
+          try {
+            self.select();
+          } catch {
+            void 0;
+          }
+        });
+      });
+    });
+  }
+
+  function initDetailExpenses() {
+    const cb = el('detailExpenses');
+    const wrap = el('detailExpensesFields');
+    if (!cb || !wrap) return;
+    function sync() {
+      const on = cb.checked;
+      wrap.classList.toggle('hidden', !on);
+      wrap.setAttribute('aria-hidden', on ? 'false' : 'true');
+      calc();
+    }
+    cb.addEventListener('change', sync);
+    sync();
+  }
+
+  function initQuickPresets() {
+    const city = el('presetCity');
+    const hw = el('presetHighway');
+    if (city) {
+      city.addEventListener('click', () => {
+        el('mpg').value = '20';
+        el('miles').value = '80';
+        calc();
+      });
+    }
+    if (hw) {
+      hw.addEventListener('click', () => {
+        el('mpg').value = '35';
+        el('miles').value = '200';
+        calc();
+      });
     }
   }
 
@@ -269,6 +394,9 @@ function suggestedGasPrice(state, fuelType) {
     if (tgUser) tgUser.textContent = '@' + TELEGRAM_USERNAME;
 
     initSpaNav();
+    initSelectAllOnFocus();
+    initDetailExpenses();
+    initQuickPresets();
 
     syncInputFromSelection();
     renderStateList('');
@@ -317,7 +445,7 @@ function suggestedGasPrice(state, fuelType) {
     document.addEventListener('mousedown', onDocPointerDown);
     document.addEventListener('touchstart', onDocPointerDown, { passive: true });
 
-    ['gross', 'miles', 'mpg', 'gasPrice'].forEach((id) => {
+    ['gross', 'miles', 'mpg', 'gasPrice', 'insurancePerShift', 'carWash'].forEach((id) => {
       const node = el(id);
       if (!node) return;
       node.addEventListener('input', calc);
@@ -325,7 +453,7 @@ function suggestedGasPrice(state, fuelType) {
     });
 
     const calcBtn = el('calcBtn');
-    if (calcBtn) calcBtn.addEventListener('click', calc);
+    if (calcBtn) calcBtn.addEventListener('click', onCalculateClick);
 
     $$('[data-copy-usdt]').forEach((btn) => {
       btn.addEventListener('click', async () => {
